@@ -23,8 +23,20 @@ api doc:
 class coinw:
 
     api     = 'http://api.coinw.ai/appApi.html?'
-    api_key     = '1b3342b5-8baf-4669-a1bc-9047ad8b720a'
-    api_secret  = '5RAIGRUWKDS2I9VAYI2I4QSZ4HZAIVETUXE1'
+
+    apiconfig = {
+        'api_key':      '1b3342b5-8baf-4669-a1bc-9047ad8b720a',
+        'api_secret':   '5RAIGRUWKDS2I9VAYI2I4QSZ4HZAIVETUXE1'
+    }
+
+    @staticmethod
+    def set_apiconfig(apiconfig = {}):
+        for k in coinw.apiconfig:
+            if k not in apiconfig:
+                apiconfig = coinw.apiconfig
+                break
+        return apiconfig
+
 
     symbols = {
         'btc/cnyt'  : 45,
@@ -58,12 +70,13 @@ class coinw:
     签名
     '''
     @staticmethod
-    def sign(path, params = {}):
+    def sign(path, params = {}, apiconfig = {}):
+        apiconfig = coinw.set_apiconfig(apiconfig)
         params.update({
-            'api_key': coinw.api_key,
+            'api_key': apiconfig['api_key'],
         })
         params = sorted(params.items(), key=lambda d: d[0], reverse=False)
-        sign = md5.encode(urllib.parse.urlencode(params) + '&secret_key=' + coinw.api_secret)
+        sign = md5.encode(urllib.parse.urlencode(params) + '&secret_key=' + apiconfig['api_secret'])
         return coinw.api + path + '&' + urllib.parse.urlencode(params) + '&sign=' + sign.upper()
 
     '''
@@ -98,7 +111,7 @@ class coinw:
         }]
         path = 'action=depth'
         params = {
-            'symbol':coinw.symbols[symbol]
+            'symbol': coinw.symbols[symbol]
         }
         try:
             response = requests.get(coinw.sign(path, params))
@@ -140,11 +153,11 @@ class coinw:
             if response.status_code == 200:
                 print(response.json())
                 if response.json().get('data'):
-                    return True    
+                    return True
         except:
             pass
         return False
-  
+
 
     '''
     提币
@@ -179,4 +192,3 @@ if __name__ == '__main__':
 #    coinw.order('buy', 'moac/cnyt', 1, 1)
 
     coinw.withdraw('moac/cnyt', 1, '', '')
-

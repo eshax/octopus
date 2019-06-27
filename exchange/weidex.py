@@ -7,6 +7,7 @@ import time
 
 import sys
 import os
+import logging
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -14,6 +15,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from jingtum_python_lib.remote import Remote
 from jingtum_python_baselib.wallet import Wallet
 from jingtum_python_baselib.serializer import Serializer
+
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 '''
 威链
@@ -52,8 +55,18 @@ class weidex:
         ]
     }
 
-    api_key = 'jKWx6pWumUv7grbTK8CBUpAk4dTCDASzGg'
-    api_secret = 'snifFnwDi8siekkKFmXrM5zRtPjxM'
+    apiconfig = {
+        'api_key' : 'jKWx6pWumUv7grbTK8CBUpAk4dTCDASzGg',
+        'api_secret' : 'snifFnwDi8siekkKFmXrM5zRtPjxM',
+    }
+
+    @staticmethod
+    def set_apiconfig(apiconfig = {}):
+        for k in weidex.apiconfig:
+            if k not in apiconfig:
+                apiconfig = weidex.apiconfig
+                break
+        return apiconfig
 
     symbols = {
         'eth/cnyt': 'JETH-CNY',
@@ -95,9 +108,10 @@ class weidex:
     帐户余额
     '''
     @staticmethod
-    def get_balance():
+    def get_balance(apiconfig = {}):
+        apiconfig = coinw.set_apiconfig(apiconfig)
         data = {'exchange': 'weidex'}
-        path = '/exchange/balances/' + weidex.api_key
+        path = '/exchange/balances/' + apiconfig['api_key']
         try:
             response = requests.get(weidex.get_api('ex', path))
             if response.status_code == 200:
@@ -153,8 +167,9 @@ class weidex:
     获取交易序号
     '''
     @staticmethod
-    def get_sequence():
-        path = '/exchange/sequence/' + weidex.api_key
+    def get_sequence(apiconfig = {}):
+        apiconfig = coinw.set_apiconfig(apiconfig)
+        path = '/exchange/sequence/' + apiconfig['api_key']
         try:
             response = requests.get(weidex.get_api('ex', path))
             if response.status_code == 200:
@@ -167,8 +182,8 @@ class weidex:
     挂单
     '''
     @staticmethod
-    def order(type, symbol, price, amount):
-
+    def order(type, symbol, price, amount, apiconfig = {}):
+        apiconfig = coinw.set_apiconfig(apiconfig)
         # 交易币种
         symbols = weidex.symbols[symbol]
         symbols = symbols.split('-')
@@ -176,7 +191,7 @@ class weidex:
         o = {
             "Flags": 0,
             "Fee": 0.00001,
-            "Account": weidex.api_key,
+            "Account": apiconfig['api_key'],
             "TransactionType": 'OfferCreate',
             "TakerGets": {
                 "issuer": 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or'
@@ -202,7 +217,7 @@ class weidex:
             o['TakerPays']['value'] =  price * amount
             o['TakerPays']['currency'] = symbols[1]
 
-        w = Wallet(weidex.api_secret)
+        w = Wallet(apiconfig['api_secret'])
 
         o['Sequence'] = weidex.get_sequence()
         o['SigningPubKey'] = w.get_public_key()
@@ -225,24 +240,25 @@ class weidex:
                     return True
         except:
             pass
-        
+
         return False
 
     '''
     撤单
     '''
     @staticmethod
-    def cancel_order(sequence):
+    def cancel_order(sequence, apiconfig = {}):
+        apiconfig = coinw.set_apiconfig(apiconfig)
 
         o = {
             "Flags": 0,
             "Fee": 0.00001,
-            "Account": weidex.api_key,
+            "Account": apiconfig['api_key'],
             "TransactionType": 'OfferCancel',
             "OfferSequence": sequence
         }
 
-        w = Wallet(weidex.api_secret)
+        w = Wallet(apiconfig['api_secret'])
 
         o['Sequence'] = weidex.get_sequence()
         o['SigningPubKey'] = w.get_public_key()
@@ -265,8 +281,9 @@ class weidex:
     获取所有挂单sequence号
     '''
     @staticmethod
-    def orders():
-        path = '/exchange/orders/%s/1' % weidex.api_key
+    def orders(apiconfig = {}):
+        apiconfig = coinw.set_apiconfig(apiconfig)
+        path = '/exchange/orders/%s/1' % apiconfig['api_key']
         try:
             response = requests.get(weidex.get_api('ex', path))
             if response.status_code == 200:
