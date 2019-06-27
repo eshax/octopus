@@ -63,7 +63,7 @@ class coinw:
         params.update({
             'api_key': coinw.api_key,
         })
-        params = dict(sorted(params.items(), key=lambda d: d[0], reverse=False))
+        params = sorted(params.items(), key=lambda d: d[0], reverse=False)
         sign = md5.encode(urllib.parse.urlencode(params) + '&secret_key=' + coinw.api_secret)
         return coinw.api + path + '&' + urllib.parse.urlencode(params) + '&sign=' + sign.upper()
 
