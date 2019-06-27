@@ -5,10 +5,9 @@ import requests
 import time
 import urllib
 
-# import sys
-# import os
-
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils.md5 import md5
 
@@ -147,8 +146,37 @@ class coinw:
         return False
   
 
+    '''
+    提币
+    '''
+    @staticmethod
+    def withdraw(symbol, amount, address, memo):
+        path = 'action=withdraw'
+        params = {
+            'symbol':          coinw.symbols[symbol],    # 币种
+            'amount':          amount,                   # 数量
+            'withdrawaddress': address,                  # 地址
+            'memo':            memo                      # 备注(有些币种需要填写)
+        }
+        try:
+            response = requests.post( coinw.sign( path, params ) )
+            print( response.json() )
+            if response.status_code == 200:
+                print( resposne.json() )
+                if response.json().get('data'):
+                    return True
+        except:
+            pass
+        return False
+
+
+
 
 if __name__ == '__main__':
-    # print(coinw.get_balance())
-    print(coinw.get_depth('moac/cnyt', 2))
-    # coinw.order('buy', 'moac/cnyt', 1, 1)
+
+#    print(coinw.get_balance())
+#    print(coinw.get_depth('moac/cnyt', 1))
+#    coinw.order('buy', 'moac/cnyt', 1, 1)
+
+    coinw.withdraw('moac/cnyt', 1, '', '')
+
