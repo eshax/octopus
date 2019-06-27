@@ -19,17 +19,32 @@ class ex:
     ]
 
     @staticmethod
+    def get_balance(ex):
+        if ex == 'weidex':
+            return weidex.get_balance()
+        elif ex == 'huobi':
+            return huobi.get_balance()
+        elif ex == 'coinw':
+            return coinw.get_balance()
+        elif ex == 'coinbene':
+            return coinbene.get_balance()
+        elif ex == 'bitz':
+            return bitz.get_balance()
+        return False
+
+
+    @staticmethod
     def get_depth(ex, symbol, size = 1):
         if ex == 'weidex':
             return weidex.get_depth(symbol, size)
-        # elif ex == 'huobi':
-        #     return huobi.get_depth(symbol, size)
-        # elif ex == 'coinw':
-        #     return coinw.get_depth(symbol, size)
-        # elif ex == 'coinbene':
-        #     return coinbene.get_depth(symbol, size)
-        # elif ex == 'bitz':
-        #     return bitz.get_depth(symbol, size)
+        elif ex == 'huobi':
+            return huobi.get_depth(symbol, size)
+        elif ex == 'coinw':
+            return coinw.get_depth(symbol, size)
+        elif ex == 'coinbene':
+            return coinbene.get_depth(symbol, size)
+        elif ex == 'bitz':
+            return bitz.get_depth(symbol, size)
         return [{
             'buy_price': 0,
             'buy_amount': 0,
@@ -55,8 +70,8 @@ class ex:
             status = coinw.order(type, symbol, price, amount)
         elif ex == 'coinbene':
             status = coinbene.order(type, symbol, price, amount)
-        # elif ex == 'bitz':
-        #     status = bitz.order(type, symbol, price, amount)
+        elif ex == 'bitz':
+            status = bitz.order(type, symbol, price, amount)
 
         return status
 

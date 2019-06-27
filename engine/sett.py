@@ -24,15 +24,21 @@ def sett(exchange, a_symbol, b_symbol, c_symbol, type, i):
     b_depth = db.redis.hgetall('depth.%s.%s.%s' % (exchange, b_symbol, i))
     c_depth = db.redis.hgetall('depth.%s.%s.%s' % (exchange, c_symbol, i))
 
-    if a_depth and b_depth and c_depth and float(c_depth['sell_amount']) > 0 and float(b_depth['buy_price']) > 0 and float(b_depth['sell_price']) > 0:
+    if a_depth and b_depth and c_depth and float(c_depth['sell_amount']) > 0 and float(b_depth['buy_price']) > 0 and float(b_depth['sell_price']) > 0 and float(a_depth['buy_price']) > 0:
         fee = ex.get_fee(exchange)
         a_price = float(a_depth['buy_price'])
         c_price = float(c_depth['sell_price'])
 
+        balance = db.redis.hget('balance.' + exchange, a_symbol.split('/')[1])
+        if balance:
+            max_amount = float(balance) / float(a_depth['buy_price'])
+        else:
+            max_amount = 0
+
         if (type == 'bbs'):
             b_price = float(b_depth['buy_price'])
             amount = [float(a_depth['buy_amount']) / b_price,
-                      float(b_depth['buy_amount']), float(c_depth['sell_amount'])]
+                      float(b_depth['buy_amount']), float(c_depth['sell_amount']), max_amount]
             # amount = [float(a_depth['buy_amount']) / b_price, float(b_depth['buy_amount'])]
             amount = min(amount)
             a_amount = amount * b_price
@@ -41,7 +47,7 @@ def sett(exchange, a_symbol, b_symbol, c_symbol, type, i):
         else:
             b_price = float(b_depth['sell_price'])
             amount = [float(a_depth['buy_amount']), float(
-                b_depth['sell_amount']), float(c_depth['sell_amount']) / b_price]
+                b_depth['sell_amount']), float(c_depth['sell_amount']) / b_price, max_amount]
             # amount = [float(a_depth['buy_amount']), float(b_depth['sell_amount'])]
             amount = min(amount)
             a_amount = amount
@@ -59,8 +65,9 @@ def sett(exchange, a_symbol, b_symbol, c_symbol, type, i):
 
         cnyt_rate = otc.get(a_symbol.split('/')[1], 'buy')
         cnyt_profit = profit * cnyt_rate
+        cnyt_cost = cost * cnyt_rate
 
-        if cnyt_profit > 0:
+        if cnyt_cost > 1 and cnyt_profit > 0.5:
             log = '(%s) %s %s -> %s -> %s 成本:%s 利润:%s 利润率:%s' % (exchange, type, a_symbol,
                                                                  b_symbol, c_symbol, cost * cnyt_rate, profit * cnyt_rate, str(rate) + '%')
             print(time.strftime("%Y-%m-%d %H:%M:%S"), log, amount)

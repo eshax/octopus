@@ -25,8 +25,10 @@ def cebt(a_ex, b_ex, a_symbol, b_symbol, i):
     if a_depth and b_depth and float(a_depth['buy_amount']) > 0 and float(b_depth['sell_amount']) > 0:
         a_fee = ex.get_fee(a_ex)
         b_fee = ex.get_fee(b_ex)
-        
-        amount = min([float(a_depth['buy_amount']), float(b_depth['sell_amount'])])
+        balance = db.redis.hget('balance.' + b_ex, b_symbol.split('/')[0])
+        if balance is None:
+            balance = 0
+        amount = min([float(a_depth['buy_amount']), float(b_depth['sell_amount']), float(balance)])
         a_price = float(a_depth['buy_price'])
         b_price = float(b_depth['sell_price'])
 
@@ -39,10 +41,10 @@ def cebt(a_ex, b_ex, a_symbol, b_symbol, i):
         else:
             rate = round(profit / cost * 100, 2)
         
-        if profit > 0:
+        if cost > 1 and profit > 0.5:
             log = '(%s) %s -> (%s) %s 成本:%s 利润:%s 利润率:%s' % (a_ex, a_symbol, b_ex, b_symbol, cost, profit, str(rate) + '%')
             print(time.strftime("%Y-%m-%d %H:%M:%S"), log, amount)
-            # doing(a_ex, a_symbol, a_price, b_ex, b_symbol, b_price, amount)
+            doing(a_ex, a_symbol, a_price, b_ex, b_symbol, b_price, amount)
 
 def doing(a_ex, a_symbol, a_price, b_ex, b_symbol, b_price, amount):
     print(a_ex, a_symbol, a_price, b_ex, b_symbol, b_price, amount)

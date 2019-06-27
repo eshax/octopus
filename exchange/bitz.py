@@ -7,6 +7,11 @@ import time
 import urllib
 import json
 
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from utils.md5 import md5
 
 '''
@@ -83,6 +88,7 @@ class bitz:
             if response.status_code == 200:
                 if (response.json().get('status') == 200):
                     items = response.json().get('data')
+                    print(items)
                     # for item in items:
                     #     free = float(item['available'])
                     #     if free > 0:
@@ -157,6 +163,6 @@ class bitz:
 
 if __name__ == '__main__':
     pass
-    # print(bitz.get_balance())
+    print(bitz.get_balance())
     # print(bitz.get_depth('moac/eth'))
-    bitz.order('buy', 'moac/eth', 1, 0.001)
+    # bitz.order('buy', 'moac/eth', 1, 0.001)

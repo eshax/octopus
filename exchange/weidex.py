@@ -5,6 +5,12 @@ import requests
 import random
 import time
 
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
 from jingtum_python_lib.remote import Remote
 from jingtum_python_baselib.wallet import Wallet
 from jingtum_python_baselib.serializer import Serializer
@@ -76,7 +82,6 @@ class weidex:
         'moac/swtc': 'JMOAC-SWT',
         'jcc/swtc': 'JJCC-SWT',
         'vcc/swtc': 'VCC-SWT',
-        'csp/swtc': 'CSP-SWT',
         'slash/swtc': 'JSLASH-SWT',
         'stm/swtc': 'JSTM-SWT',
         'call/swtc': 'JCALL-SWT',
@@ -223,6 +228,67 @@ class weidex:
         
         return False
 
+    '''
+    撤单
+    '''
+    @staticmethod
+    def cancel_order(sequence):
+
+        o = {
+            "Flags": 0,
+            "Fee": 0.00001,
+            "Account": weidex.api_key,
+            "TransactionType": 'OfferCancel',
+            "OfferSequence": sequence
+        }
+
+        w = Wallet(weidex.api_secret)
+
+        o['Sequence'] = weidex.get_sequence()
+        o['SigningPubKey'] = w.get_public_key()
+        prefix = 0x53545800
+        serial = Serializer(None)
+        hash = serial.from_json(o).hash(prefix)
+        o['TxnSignature'] = w.sign(hash)
+        blob = serial.from_json(o).to_hex()
+        path= '/exchange/sign_cancel_order'
+        data = {}
+        data['sign'] = blob
+        try:
+            response = requests.delete(weidex.get_api('ex', path), data)
+            print(response.json())
+        except:
+            pass
+
+
+    '''
+    获取所有挂单sequence号
+    '''
+    @staticmethod
+    def orders():
+        path = '/exchange/orders/%s/1' % weidex.api_key
+        try:
+            response = requests.get(weidex.get_api('ex', path))
+            if response.status_code == 200:
+                data = response.json().get('data')
+                orders = []
+                for item in data:
+                    orders.append(item['sequence'])
+                return orders
+        except:
+            pass
+        return False
+
+    @staticmethod
+    def recharge():
+        pass
+
+    @staticmethod
+    def withdraw():
+        pass
+
 
 if __name__ == '__main__':
-    print(weidex.get_depth('swtc/cnyt'))
+    orders = weidex.orders()
+    print(orders)
+    # print(weidex.get_depth('swtc/cnyt'))

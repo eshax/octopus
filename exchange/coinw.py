@@ -5,11 +5,6 @@ import requests
 import time
 import urllib
 
-# import sys
-# import os
-
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from utils.md5 import md5
 
 '''
@@ -128,7 +123,7 @@ class coinw:
         path = 'action=trade'
         params = {
             'symbol': coinw.symbols[symbol],
-            'amount': amount,
+            'amount': '%.2f' % amount,
             'price': price
         }
         if type == 'buy':

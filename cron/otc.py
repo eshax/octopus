@@ -36,12 +36,12 @@ class otc:
                     data = response.json().get('data')
                     v = data[0]['price']
                     db.redis.hset('otc', k, v)
-                    print(k, v)
 
         swtc = weidex.get_depth('swtc/cnyt')[0]
         print(swtc)
         db.redis.hset('otc', 'swtc_buy', swtc['sell_price'])
         db.redis.hset('otc', 'swtc_sell', swtc['buy_price'])
+        print(db.redis.hgetall('otc'))
 
     @staticmethod
     def get(symbol, type):
