@@ -1,22 +1,34 @@
-#
-# octopus.conf
-#
+{
 
-[symbols]
-cnyt=swtc,eth,btc,moac
-usdt=swtc,moac
+    "apiconfig": 
+    {
+        "weidex": 
+        {
+            "api_key": "jKWx6pWumUv7grbTK8CBUpAk4dTCDASzGg",
+            "api_secret": "snifFnwDi8siekkKFmXrM5zRtPjxM"
+        },
+        "coinw": 
+        {
+            "api_key": "1b3342b5-8baf-4669-a1bc-9047ad8b720a",
+            "api_secret": "5RAIGRUWKDS2I9VAYI2I4QSZ4HZAIVETUXE1"
+        }
+    },
 
-[weidex.apiconfig]
-api_key=jKWx6pWumUv7grbTK8CBUpAk4dTCDASzGg
-api_secret=snifFnwDi8siekkKFmXrM5zRtPjxM
-
-[coinw.apiconfig]
-api_key=1b3342b5-8baf-4669-a1bc-9047ad8b720a
-api_secret=5RAIGRUWKDS2I9VAYI2I4QSZ4HZAIVETUXE1
-
-[weidex.symbols]
-swtc_cnyt=SWT-CNY
-
-
-[coinw.symbols]
-swtc_cnyt=47
+    "symbols": 
+    {
+        "global": 
+        [
+            "swtc/cnyt", "eth/cnyt", "btc/cnyt", "moac/cnyt"
+        ],
+        "weidex": 
+        {
+            "swtc/cnyt": "SWT-CNY"
+        },
+        "coinw": 
+        {
+            "swtc/cnyt": 47
+        }
+    }
+    
+    
+}
