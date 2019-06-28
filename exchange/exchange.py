@@ -9,6 +9,7 @@ sys.path.append(root_path)
 
 from octopus.exchange.coinw import coinw
 from octopus.exchange.weidex import weidex
+from octopus.exchange.coinbene import coinbene
 
 class exchange:
 
@@ -18,6 +19,7 @@ class exchange:
     exchanges = {
         "coinw": coinw,
         "weidex": weidex,
+        "coinbene": coinbene
     }
 
     '''

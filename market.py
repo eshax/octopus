@@ -70,16 +70,25 @@ class depth:
         for e in ex.exchanges:
             for s in ex.exchanges[e].symbols:
                 if s in ex.symbols:
-                    threading.Thread(target=depth.get, args=(e, s)).start()
+                    threading.Thread(target=depth.scan, args=(e, s)).start()
 
     @staticmethod
-    def get(e, s):
+    def scan(e, s):
+        k = '%s.%s' % (e, s)
         while True:
             o = ex.get_depth(e, s)
             if o:
-                mc.set(e + s, o, 5)
-                print(e, s, mc.get(e + s))
-            time.sleep(5)
+                o = o[0]
+                bp, sp = float(o.get("buy_price")), float(o.get("sell_price"))
+                if bp > 0 and sp > 0:
+                    mc.set(k, o, 20)
+                    # print(e, s, mc.get(k))
+            time.sleep(10)
+
+    @staticmethod
+    def get(e, s):
+        k = '%s.%s' % (e, s)
+        return mc.get(k)
 
 """
 市场空间
@@ -89,8 +98,48 @@ class depth:
 """
 class space:
 
-    pass
+    @staticmethod
+    def run():
 
+        # Cross Exchange Bilateral Trade
+        data = [(e, set(ex.exchanges[e].symbols.keys())) for e in ex.exchanges]
+        data = [(e1, e2, s1, s2) for e1, s1 in data for e2, s2 in data if e2 > e1]
+        for e1, e2, s1, s2 in data:
+            for s in (s1 & s2):
+                threading.Thread(target=space.cebt, args=(e1, e2, s)).start()
+
+    @staticmethod
+    def cebt(e1, e2, s):
+
+        while True:
+            d1 = depth.get(e1, s)
+            d2 = depth.get(e2, s)
+            if d1 and d2:
+                for e1, e2, d1, d2 in [(e1, e2, d1, d2), (e2, e1, d2, d1)]:
+                    p1, p2, a1, a2 = float(d1.get("buy_price")), float(d2.get("sell_price")), float(d1.get("buy_amount")), float(d2.get("sell_amount"))
+                    k = '%s.%s.%s' % (e1, e2, s)
+                    o = {
+                        "from" : e1,
+                        "to" : e2,
+                        "symbol" : s,
+                        "buy_price": p1,
+                        "buy_amount": a1,
+                        "sell_price": p2,
+                        "sell_amount": a2,
+                        "amount": min(a1, a2),
+                        "space": p2 - p1,
+                        "ratio": (p2 - p1) / min(p1, p2),
+                    }
+                    mc.set(k, o, 4)
+                    x = mc.get(k)
+                    print({
+                        "from": x['from'],
+                        "to": x['to'],
+                        "symbol": x['symbol'],
+                        "space": round(x['space'], 6),
+                        "ratio": round(x['ratio'], 4),
+                    })
+            time.sleep(2)
 
 """
 账户
@@ -114,4 +163,8 @@ if __name__ == '__main__':
             print('config error!')
             exit()
 
+    set_config("octopus.conf")
+
     depth.run()
+
+    space.run()
