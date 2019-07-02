@@ -1,0 +1,17 @@
+{
+
+    "exchange": "weidex",
+
+    "apiconfig":
+    {
+        "api_key": "jKWx6pWumUv7grbTK8CBUpAk4dTCDASzGg",
+        "api_secret": "snifFnwDi8siekkKFmXrM5zRtPjxM"
+    },
+
+    "symbol": "swtc/cnyt",
+
+    "fluctuate": 0.00001,
+
+    "amount": 10000
+
+}
