@@ -67,7 +67,12 @@ class exchange:
         if s not in exchange.symbols:
             return False
 
-        return exchange.exchanges[e].order(t, s, p, a, apiconfig)
+        try:
+            p = float(p)
+            a = float(a)
+            return exchange.exchanges[e].order(t, s, p, a, apiconfig)
+        except:
+            return False
 
     '''
     查询委托列表
@@ -83,7 +88,35 @@ class exchange:
 
 if __name__ == '__main__':
 
-    # print(exchange.get_depth("coinw", "swtc/cnyt"))
-    # print(exchange.get_depth("huobi", "swtc/cnyt"))
+    params = sys.argv
 
-    print(exchange.orders("weidex"))
+    if len(params) == 1:
+        print()
+        print("commend:")
+        print(" depth  \t python exchange.py depth weidex swtc/cnyt")
+        print(" order  \t python exchange.py order weidex buy swtc/cnyt 0.0060 10000")
+        print(" orders \t python exchange.py orders weidex")
+        print()
+
+    if len(params) > 1:
+        cmd = params[1]
+
+        if cmd == "depth":
+            if len(params) == 4:
+                e = params[2]
+                s = params[3]
+                print(exchange.get_depth(e, s))
+
+        if cmd == "order":
+            if len(params) == 7:
+                e = params[2]
+                t = params[3]
+                s = params[4]
+                p = params[5]
+                a = params[6]
+                print(exchange.order(e, t, s, p, a))
+
+        if cmd == "orders":
+            if len(params) == 3:
+                e = params[2]
+                print(exchange.orders(e))
