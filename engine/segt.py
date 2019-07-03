@@ -38,6 +38,7 @@ def segt(conf_path):
             apiconfig = cf.get("apiconfig")
             symbol = cf.get("symbol")
             fluctuate = cf.get("fluctuate")
+            amount = cf.get("amount")
 
             _low, _high = 0.0, 0.0
 
@@ -57,14 +58,19 @@ def segt(conf_path):
 
                     if low > _low and _low > 0.0:
                         action = "[ buy %f ]" % (low - fluctuate)
+                        # ex.order(exchange, 'buy', symbol, (low - fluctuate), amount, apiconfig)
                     if low < _low and _low > 0.0:
                         action = "[ sell %f ]" % (low + fluctuate)
-                    if high > _high and _high > 0.0:
-                        action = "[ buy %f ]" % (high - fluctuate)
-                    if high < _high and _high > 0.0:
-                        action = "[ sell %f ]" % (high + fluctuate)
+                        # ex.order(exchange, 'sell', symbol, (low + fluctuate), amount, apiconfig)
+                    # if high > _high and _high > 0.0:
+                    #     action = "[ buy %f ]" % (high - fluctuate)
+                    #     ex.order(exchange, 'buy', symbol, (high - fluctuate), amount, apiconfig)
+                    # if high < _high and _high > 0.0:
+                    #     action = "[ sell %f ]" % (high + fluctuate)
+                    #     ex.order(exchange, 'sell', symbol, (high + fluctuate), amount, apiconfig)
 
-                    print(time.strftime("%Y-%m-%d %H:%M:%S"), data, 'low:', low, 'high:', high, action)
+                    if len(action) > 1:
+                        print(time.strftime("%Y-%m-%d %H:%M:%S"), data, 'low:', low, 'high:', high, action)
 
                     _low = low
                     _high = high
