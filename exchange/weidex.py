@@ -109,7 +109,7 @@ class weidex:
     '''
     @staticmethod
     def get_balance(apiconfig = {}):
-        apiconfig = coinw.set_apiconfig(apiconfig)
+        apiconfig = weidex.set_apiconfig(apiconfig)
         data = {'exchange': 'weidex'}
         path = '/exchange/balances/' + apiconfig['api_key']
         try:
@@ -168,7 +168,7 @@ class weidex:
     '''
     @staticmethod
     def get_sequence(apiconfig = {}):
-        apiconfig = coinw.set_apiconfig(apiconfig)
+        apiconfig = weidex.set_apiconfig(apiconfig)
         path = '/exchange/sequence/' + apiconfig['api_key']
         try:
             response = requests.get(weidex.get_api('ex', path))
@@ -183,7 +183,7 @@ class weidex:
     '''
     @staticmethod
     def order(type, symbol, price, amount, apiconfig = {}):
-        apiconfig = coinw.set_apiconfig(apiconfig)
+        apiconfig = weidex.set_apiconfig(apiconfig)
         # 交易币种
         symbols = weidex.symbols[symbol]
         symbols = symbols.split('-')
@@ -248,7 +248,7 @@ class weidex:
     '''
     @staticmethod
     def cancel_order(sequence, apiconfig = {}):
-        apiconfig = coinw.set_apiconfig(apiconfig)
+        apiconfig = weidex.set_apiconfig(apiconfig)
 
         o = {
             "Flags": 0,
