@@ -51,18 +51,39 @@ class exchange:
     '''
     下单
     params::
-            e: 交易所代码
-            s: 币种
-            p: 下单价格
-            a: 下单量
-    apiconfig: API 参数
+                e: 交易所代码
+                t: 下单类型 (buy: 买 sell: 卖)
+                s: 币种
+                p: 下单价格
+                a: 下单量
+        apiconfig: API 参数
     '''
     @staticmethod
-    def order(e, s, p, a, apiconfig = {}):
-        pass
+    def order(e, t, s, p, a, apiconfig = {}):
+
+        if e not in exchange.exchanges:
+            return False
+
+        if s not in exchange.symbols:
+            return False
+
+        return exchange.exchanges[e].order(t, s, p, a, apiconfig)
+
+    '''
+    查询委托列表
+    params::
+                e: 交易所代码
+        apiconfig: API 参数
+    '''
+    @staticmethod
+    def orders(e, apiconfig = {}):
+
+        return exchange.exchanges[e].orders(apiconfig)
 
 
 if __name__ == '__main__':
 
-    print(exchange.get_depth("coinw", "swtc/cnyt"))
-    print(exchange.get_depth("huobi", "swtc/cnyt"))
+    # print(exchange.get_depth("coinw", "swtc/cnyt"))
+    # print(exchange.get_depth("huobi", "swtc/cnyt"))
+
+    print(exchange.orders("weidex"))
