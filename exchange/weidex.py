@@ -277,12 +277,21 @@ class weidex:
             pass
 
 
+    @staticmethod
+    def get_symbol_from_pair(pair):
+        symbols = [o.split("+")[0] for o in pair.split("/")]
+        symbol = '-'.join(symbols)
+        for k, v in weidex.symbols.items():
+            if v == symbol:
+                return k
+        return None
+
     '''
-    获取所有挂单sequence号
+    获取委托列表
     '''
     @staticmethod
     def orders(apiconfig = {}):
-        apiconfig = coinw.set_apiconfig(apiconfig)
+        apiconfig = weidex.set_apiconfig(apiconfig)
         path = '/exchange/orders/%s/1' % apiconfig['api_key']
         try:
             response = requests.get(weidex.get_api('ex', path))
@@ -290,8 +299,34 @@ class weidex:
                 data = response.json().get('data')
                 orders = []
                 for item in data:
-                    orders.append(item['sequence'])
+                    o = {
+                        "type": item['type'],
+                        "symbol": weidex.get_symbol_from_pair(item['pair']),
+                        "price": float(item['price']),
+                        "amount": float(item['amount']),
+                        "sequence": item['sequence']
+                    }
+                    orders.append(o)
                 return orders
+        except:
+            pass
+        return False
+
+    '''
+    获取所有挂单 sequence 号
+    '''
+    @staticmethod
+    def sequences(apiconfig = {}):
+        apiconfig = weidex.set_apiconfig(apiconfig)
+        path = '/exchange/orders/%s/1' % apiconfig['api_key']
+        try:
+            response = requests.get(weidex.get_api('ex', path))
+            if response.status_code == 200:
+                data = response.json().get('data')
+                sequences = []
+                for item in data:
+                    sequences.append(item['sequence'])
+                return sequences
         except:
             pass
         return False
