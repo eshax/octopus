@@ -103,17 +103,12 @@ if __name__ == '__main__':
 
         if cmd == "depth":
             if len(params) == 4:
-                e = params[2]
-                s = params[3]
+                e, s = params[2:]
                 print(exchange.get_depth(e, s))
 
         if cmd == "order":
             if len(params) == 7:
-                e = params[2]
-                t = params[3]
-                s = params[4]
-                p = params[5]
-                a = params[6]
+                e, t, s, p, a = params[2:]
                 print(exchange.order(e, t, s, p, a))
 
         if cmd == "orders":
