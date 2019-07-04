@@ -145,7 +145,7 @@ class weidex:
         }]
         path = '/info/depth/%s/normal' % weidex.symbols[symbol]
         try:
-            response = requests.get(weidex.get_api('info', path))
+            response = requests.get(weidex.get_api('info', path), timeout=5)
             if response.status_code == 200:
                 items = response.json().get('data')
                 list = []
@@ -309,7 +309,10 @@ class weidex:
             try:
                 sequence += 1
                 response = requests.post(weidex.get_api('ex', path), data)
-            except:
+                if response.status_code == 200:
+                    print(time.strftime("%Y-%m-%d %H:%M:%S"), response.json())
+            except Exception as exp:
+                print(exp)
                 return False
 
         return True
