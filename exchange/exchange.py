@@ -75,6 +75,24 @@ class exchange:
             return False
 
     '''
+    批量下单
+    params::
+             data: 下单数据
+        apiconfig: API 参数
+    '''
+    @staticmethod
+    def order_many(e, data, apiconfig = {}):
+
+        if e not in exchange.exchanges:
+            return False
+
+        try:
+            return exchange.exchanges[e].order_many(data, apiconfig)
+        except:
+            return False
+
+
+    '''
     查询委托列表
     params::
                 e: 交易所代码
@@ -114,4 +132,7 @@ if __name__ == '__main__':
         if cmd == "orders":
             if len(params) == 3:
                 e = params[2]
-                print(exchange.orders(e))
+                orders = exchange.orders(e)
+                orders = sorted(orders, key=lambda s: float(s["price"]))
+                for o in orders:
+                    print("%s\t%s\t%s\t%s" % (o['type'], o['symbol'], o['price'], o['amount']))
