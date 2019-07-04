@@ -132,7 +132,7 @@ class space:
                     }
                     mc.set(k, o, 4)
                     x = mc.get(k)
-                    print({
+                    print(time.strftime("%Y-%m-%d %H:%M:%S"), {
                         "from": x['from'],
                         "to": x['to'],
                         "symbol": x['symbol'],

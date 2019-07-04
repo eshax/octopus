@@ -23,7 +23,7 @@ def format_price(price, fluctuate):
 
 def segt(conf_path):
 
-    print(conf_path)
+    print("load config:", conf_path)
 
     try:
         with open(conf_path, 'r') as f:
@@ -34,11 +34,18 @@ def segt(conf_path):
                     print("config no %s!" % c)
                     return
 
+            print(".")
             exchange = cf.get("exchange")
+            print("exchange: \t", exchange)
             apiconfig = cf.get("apiconfig")
+            print("apiconfig:\t", apiconfig)
             symbol = cf.get("symbol")
+            print("symbol:   \t", symbol)
             fluctuate = cf.get("fluctuate")
+            print("fluctuate:\t %f" % fluctuate)
             amount = cf.get("amount")
+            print("amount:   \t", amount)
+            print(".")
 
             _low, _high = 0.0, 0.0
 
@@ -54,23 +61,52 @@ def segt(conf_path):
                     low = format_price(min(bp, sp), fluctuate)
                     high = format_price(max(bp, sp), fluctuate)
 
-                    action = "."
+                    '''
+                    1、监控买一数据的变化
+                    2、以买一价格为中心
+                    3、上下挂单, 上挂卖, 下挂买, 共挂 10 单
+                    4、查询委托列表、不进行重复挂单
+                    例如:
+                        当前买一价格为 0.00725
+                        挂买入 0.00724 0.00723 0.00722 0.00721 0.00720
+                        挂卖出 0.00726 0.00727 0.00728 0.00729 0.00730
+                    '''
+                    if low != _low:
+                        print(time.strftime("%Y-%m-%d %H:%M:%S"), data, 'low:', low, 'high:', high)
+                        orders = ex.orders(exchange, apiconfig)
+                        prices = set([(o['type'], float(o['price'])) for o in orders if o['symbol'] == symbol])
+                        print("buys:", sorted([y for x, y in prices if x == "buy"]))
+                        print("sells:", sorted([y for x, y in prices if x == "sell"]))
+                        order_many_list = []
+                        for n in range(1, 6):
+                            # buy
+                            price = format_price((low - (fluctuate * n)), fluctuate)
+                            if ('buy', price) not in prices:
+                                order_many_list.append(
+                                    {
+                                        "type": "buy",
+                                        "symbol": symbol,
+                                        "price": price,
+                                        "amount": int(amount)
+                                    }
+                                )
+                                print(time.strftime("%Y-%m-%d %H:%M:%S"), data, 'low:', low, 'high:', high, "[ buy %f ]" % price)
+                            # sell
+                            price = format_price((low + (fluctuate * n)), fluctuate)
+                            if ('sell', price) not in prices:
+                                order_many_list.append(
+                                    {
+                                        "type": "sell",
+                                        "symbol": symbol,
+                                        "price": price,
+                                        "amount": int(amount)
+                                    }
+                                )
+                                print(time.strftime("%Y-%m-%d %H:%M:%S"), data, 'low:', low, 'high:', high, "[ sell %f ]" % price)
+                            # execute
+                            ex.order_many(exchange, order_many_list, apiconfig)
 
-                    if low > _low and _low > 0.0:
-                        action = "[ buy %f ]" % (low - fluctuate)
-                        # ex.order(exchange, 'buy', symbol, (low - fluctuate), amount, apiconfig)
-                    if low < _low and _low > 0.0:
-                        action = "[ sell %f ]" % (low + fluctuate)
-                        # ex.order(exchange, 'sell', symbol, (low + fluctuate), amount, apiconfig)
-                    # if high > _high and _high > 0.0:
-                    #     action = "[ buy %f ]" % (high - fluctuate)
-                    #     ex.order(exchange, 'buy', symbol, (high - fluctuate), amount, apiconfig)
-                    # if high < _high and _high > 0.0:
-                    #     action = "[ sell %f ]" % (high + fluctuate)
-                    #     ex.order(exchange, 'sell', symbol, (high + fluctuate), amount, apiconfig)
-
-                    if len(action) > 1:
-                        print(time.strftime("%Y-%m-%d %H:%M:%S"), data, 'low:', low, 'high:', high, action)
+                        print(".")
 
                     _low = low
                     _high = high
