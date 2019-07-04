@@ -243,6 +243,77 @@ class weidex:
 
         return False
 
+
+    '''
+    批量下单
+        |--- data: 下单数据
+        |      |--- type:   下单类型(buy: 买 sell: 卖)
+        |      |--- symbol: 币种
+        |      |--- price:  价格
+        |      |--- amount: 数量
+        |--- apiconfig: API配置信息
+    '''
+    @staticmethod
+    def order_many(data, apiconfig = {}):
+        apiconfig = weidex.set_apiconfig(apiconfig)
+        sequence = weidex.get_sequence()
+        for x in data:
+            type, symbol, price, amount = x['type'], x['symbol'], x['price'], x['amount']
+            # 交易币种
+            symbols = weidex.symbols[symbol]
+            symbols = symbols.split('-')
+
+            o = {
+                "Flags": 0,
+                "Fee": 0.00001,
+                "Account": apiconfig['api_key'],
+                "TransactionType": 'OfferCreate',
+                "TakerGets": {
+                    "issuer": 'jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or'
+                },
+                "TakerPays": {
+                    "issuer": "jGa9J9TkqtBcUoHe2zqhVFFbgUVED6o9or"
+                }
+            }
+
+            # 交易类型
+            if type.lower() == 'buy':
+                # buy 买
+                o['Flags'] = 0
+                o['TakerGets']['value'] = price * amount
+                o['TakerGets']['currency'] = symbols[1]
+                o['TakerPays']['value'] =  amount
+                o['TakerPays']['currency'] = symbols[0]
+            else:
+                # sell 卖
+                o['Flags'] = 524288
+                o['TakerGets']['value'] = amount
+                o['TakerGets']['currency'] = symbols[0]
+                o['TakerPays']['value'] =  price * amount
+                o['TakerPays']['currency'] = symbols[1]
+
+            w = Wallet(apiconfig['api_secret'])
+
+            o['Sequence'] = sequence
+            o['SigningPubKey'] = w.get_public_key()
+            prefix = 0x53545800
+            serial = Serializer(None)
+            hash = serial.from_json(o).hash(prefix)
+            o['TxnSignature'] = w.sign(hash)
+
+            data = {}
+            data['sign'] = serial.from_json(o).to_hex()
+
+            path= '/exchange/sign_order'
+
+            try:
+                sequence += 1
+                response = requests.post(weidex.get_api('ex', path), data)
+            except:
+                return False
+
+        return True
+
     '''
     撤单
     '''
@@ -341,6 +412,14 @@ class weidex:
 
 
 if __name__ == '__main__':
-    orders = weidex.orders()
-    print(orders)
+    # orders = weidex.orders()
+    # print(orders)
     # print(weidex.get_depth('swtc/cnyt'))
+
+    data = [
+        {"type": "buy", "symbol": "swtc/cnyt", "price": 0.0051, "amount": 10000},
+        {"type": "buy", "symbol": "swtc/cnyt", "price": 0.0052, "amount": 10000},
+        {"type": "buy", "symbol": "swtc/cnyt", "price": 0.0053, "amount": 10000},
+    ]
+
+    weidex.order_many(data)
