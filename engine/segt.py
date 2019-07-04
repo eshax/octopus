@@ -30,22 +30,24 @@ def segt(conf_path, run=False):
 
         cf = json.load(f)
 
-        for c in ['exchange', 'apiconfig', 'symbol', 'fluctuate', 'amount']:
+        for c in ['exchange', 'apiconfig', 'symbol', 'fluctuate', 'amount', 'service_round']:
             if c not in cf:
                 print("config no %s!" % c)
                 return
 
         print(".")
         exchange = cf.get("exchange")
-        print("exchange: \t", exchange)
+        print("exchange:        \t", exchange)
         apiconfig = cf.get("apiconfig")
-        print("apiconfig:\t", apiconfig)
+        print("apiconfig:       \t", apiconfig)
         symbol = cf.get("symbol")
-        print("symbol:   \t", symbol)
+        print("symbol:          \t", symbol)
         fluctuate = cf.get("fluctuate")
-        print("fluctuate:\t %f" % fluctuate)
+        print("fluctuate:       \t %f" % fluctuate)
         amount = cf.get("amount")
-        print("amount:   \t", amount)
+        print("amount:          \t", amount)
+        service_round = cf.get("service_round")
+        print("service round:   \t", service_round)
         print(".")
 
         while True:
@@ -114,22 +116,22 @@ def segt(conf_path, run=False):
                     print(".")
 
             if run:
-                time.sleep(10)
+                time.sleep(service_round)
             else:
                 break
 
 
 if __name__ == '__main__':
 
-    if len(sys.argv) == 3:
-        cmd = sys.argv[1]
-        if cmd == "start":
-            conf_path = sys.argv[2]
-            threading.Thread(target=segt, args=(conf_path, True)).start()
-
     if len(sys.argv) == 2:
         conf_path = sys.argv[1]
-        segt(conf_path, False)
+        with open(conf_path, 'r') as f:
+            cf = json.load(f)
+            print("is-service:", cf.get("is_service"))
+            if cf.get("is_service"):
+                threading.Thread(target=segt, args=(conf_path, True)).start()
+            else:
+                segt(conf_path, False)
 
     if len(sys.argv) == 1:
         print("usage: python segt.py segt.conf")

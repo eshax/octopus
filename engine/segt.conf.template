@@ -1,4 +1,7 @@
 {
+    "is_service": false,
+
+    "service_round": 20,
 
     "exchange": "weidex",
 
