@@ -83,9 +83,9 @@ def segt(conf_path, run=False):
                     print(time.strftime("%Y-%m-%d %H:%M:%S"), "sells:", sorted([y for x, y in prices if x == "sell"]))
                     print(".")
                     order_many_list = []
-                    for n in range(1, 6):
+                    for n in range(1, 4):
                         # buy
-                        price = format_price((low - (fluctuate * n)), fluctuate)
+                        price = round(float(low - (fluctuate * n)), 5)
                         if ('buy', price) not in prices:
                             order_many_list.append(
                                 {
@@ -96,8 +96,9 @@ def segt(conf_path, run=False):
                                 }
                             )
                             print(time.strftime("%Y-%m-%d %H:%M:%S"), "[ buy %f ]" % price)
+                    for n in range(1, 4):
                         # sell
-                        price = format_price((low + (fluctuate * n)), fluctuate)
+                        price = round(float(low + (fluctuate * n)), 5)
                         if ('sell', price) not in prices:
                             order_many_list.append(
                                 {
