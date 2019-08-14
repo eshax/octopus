@@ -14,6 +14,7 @@ root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(root_path)
 
 from octopus.exchange.exchange import exchange as ex
+from octopus.utils.sms import sms
 
 '''
 全局设置
@@ -132,13 +133,16 @@ class space:
                     }
                     mc.set(k, o, 4)
                     x = mc.get(k)
-                    print(time.strftime("%Y-%m-%d %H:%M:%S"), {
-                        "from": x['from'],
-                        "to": x['to'],
-                        "symbol": x['symbol'],
-                        "space": round(x['space'], 6),
-                        "ratio": round(x['ratio'], 4),
-                    })
+                    if x["space"] > 0:
+                        print(time.strftime("%Y-%m-%d %H:%M:%S"), {
+                            "from": x['from'],
+                            "to": x['to'],
+                            "symbol": x['symbol'],
+                            "space": round(x['space'], 6),
+                            "ratio": round(x['ratio'], 4),
+                        })
+                        if "swtc" in x["symbol"] and "weidex" in x["from"] and "coinw" in x["to"]:
+                            sms.send(x["symbol"], x["from"], x["to"], x["buy_price"], x["sell_price"], min(x["buy_amount"], x["sell_amount"]))
             time.sleep(2)
 
 """
